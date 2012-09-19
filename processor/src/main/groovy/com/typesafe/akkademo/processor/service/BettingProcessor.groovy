@@ -8,8 +8,6 @@ import akka.actor.Props
 import akka.actor.UntypedActor
 import akka.actor.SupervisorStrategy
 import akka.actor.OneForOneStrategy
-import akka.event.Logging
-import akka.event.LoggingAdapter
 import akka.japi.Function
 import akka.util.Duration
 
@@ -20,15 +18,14 @@ import com.typesafe.akkademo.common.RetrieveBets
 import com.typesafe.akkademo.processor.repository.DatabaseFailureException
 
 
-public class BettingProcessor extends UntypedActor {
-  private LoggingAdapter log = Logging.getLogger( context.system(), this )
+class BettingProcessor extends UntypedActor {
   private Cancellable heartbeat
   private ActorRef service
   private ActorRef worker
 
-  public BettingProcessor() {
-    service = context.actorFor( context.system().settings().config().getString( "betting-service-actor" ) )
-    worker = context.actorOf( new Props( ProcessorWorker ), "theWorker" )
+  BettingProcessor() {
+    service = context.actorFor( context.system().settings().config().getString( 'betting-service-actor' ) )
+    worker = context.actorOf( new Props( ProcessorWorker ), 'theWorker' )
     use( DurationCategory ) {
       heartbeat = context.system().scheduler().schedule( 0.seconds(), 2.seconds(),
                                                          self, new RegisterProcessor() )
@@ -36,12 +33,12 @@ public class BettingProcessor extends UntypedActor {
   }
 
   @Override
-  public void postStop() {
+  void postStop() {
     heartbeat.cancel();
   }
 
   @Override
-  public SupervisorStrategy supervisorStrategy() {
+  SupervisorStrategy supervisorStrategy() {
     strategy
   }
 
@@ -60,7 +57,7 @@ public class BettingProcessor extends UntypedActor {
                 }
             } ] as Function )
 
-  public void onReceive( message ) {
+  void onReceive( message ) {
     switch( message ) {
       case PlayerBet :
         worker.tell( message, sender )

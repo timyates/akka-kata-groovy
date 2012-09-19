@@ -5,25 +5,31 @@ import akka.actor.ActorSystem
 import akka.dispatch.Await
 import akka.dispatch.Future
 import akka.pattern.Patterns
-import akka.util.Duration
 import akka.util.Timeout
+import akka.event.Logging
+import akka.event.LoggingAdapter
+
 import com.typesafe.akkademo.common.Bet
 import com.typesafe.akkademo.common.RetrieveBets
-import com.typesafe.akkademo.common.DurationCategory as DC ;
+import com.typesafe.akkademo.common.DurationCategory as DC
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
-public class BetClient {
+class BetClient {
+  LoggingAdapter log = Logging.getLogger( context.system(), this )
 
   static main( args ) {
-    println "*** STARTING TEST OF BETTING APPLICATION"
-    BetClient client = new BetClient()
-    client.init().with { system ->
+    new BetClient( args )
+  }
+
+  BetClient( args ) {
+    log.info( '*** STARTING TEST OF BETTING APPLICATION' )
+    init().with { system ->
       try {
         if( args && args.head() == 'send' ) {
-          client.sendMessages( system )
+          sendMessages( system )
         } else {
-          client.retrieveMessages( system )
+          retrieveMessages( system )
         }
       } finally {
         system.shutdown()
@@ -44,15 +50,15 @@ public class BetClient {
                                                  |    }
                                                  |  }
                                                  |}'''.stripMargin() )
-    ActorSystem.create( "TestActorSystem", config )
+    ActorSystem.create( 'TestActorSystem', config )
   }
 
   private void sendMessages( ActorSystem system ) {
     ActorRef service = getService( system )
     200.times { i ->
-      service.tell( new Bet( "ready_player_one", i % 10 + 1, i % 100 + 1 ) )
+      service.tell( new Bet( 'ready_player_one', i % 10 + 1, i % 100 + 1 ) )
     }
-    println( "*** SENDING OK" )
+    log.info( '*** SENDING OK' )
   }
 
   private void retrieveMessages( ActorSystem system ) {
@@ -62,11 +68,11 @@ public class BetClient {
       Future<Object> fBets = Patterns.ask( service, new RetrieveBets(), timeout )
       List<Bet> bets = Await.result( fBets, timeout.duration() )
       assert bets.size() == 200
-      println( "*** TESTING OK" )
+      log.info( '*** TESTING OK' )
     }
   }
 
   private ActorRef getService( ActorSystem system ) {
-    system.actorFor( "akka://BettingServiceActorSystem@127.0.0.1:2552/user/bettingService" )
+    system.actorFor( 'akka://BettingServiceActorSystem@127.0.0.1:2552/user/bettingService' )
   }
 }

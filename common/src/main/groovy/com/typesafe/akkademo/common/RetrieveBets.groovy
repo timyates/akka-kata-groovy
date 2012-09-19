@@ -1,3 +1,3 @@
 package com.typesafe.akkademo.common
 
-public class RetrieveBets implements Serializable { }
+class RetrieveBets implements Serializable { }

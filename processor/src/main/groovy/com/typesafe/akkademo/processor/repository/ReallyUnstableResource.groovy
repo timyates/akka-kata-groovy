@@ -1,16 +1,14 @@
-package com.typesafe.akkademo.processor.repository;
+package com.typesafe.akkademo.processor.repository
 
 import com.typesafe.akkademo.common.Bet
 import com.typesafe.akkademo.common.PlayerBet
 
-import java.util.*;
-
-public class ReallyUnstableResource implements UnstableResource {
+class ReallyUnstableResource implements UnstableResource {
   HashMap<Integer, Bet> bets = [:]
-  File store = new File( "persistent_store" )
+  File store = new File( 'persistent_store' )
   Random randomizer = new Random()
 
-  public ReallyUnstableResource() {
+  ReallyUnstableResource() {
     init()
   }
 
@@ -27,10 +25,17 @@ public class ReallyUnstableResource implements UnstableResource {
   }
 
   @Override
-  public void save( int idempotentId, String player, int game, int amount ) {
-    if( idempotentId % ( randomizer.nextInt(10) + 10 ) == 0) throw new RuntimeException( "Hey, I did not count on this happening..." )
-    if( idempotentId % ( randomizer.nextInt(17) + 17 ) == 0) throw new DatabaseFailureException( "Help! The database's gone haywire." )
-    if( idempotentId % ( randomizer.nextInt(121) + 50 ) == 0) System.exit( 1 )
+  void save( int idempotentId, String player, int game, int amount ) {
+    // Fraudulent instability
+    if( idempotentId % ( randomizer.nextInt(10) + 10 ) == 0 ) {
+      throw new RuntimeException( 'Hey, I did not count on this happening...' )
+    }
+    else if( idempotentId % ( randomizer.nextInt(17) + 17 ) == 0 ) {
+      throw new DatabaseFailureException( 'Help! The database has gone haywire.' )
+    }
+    else if( idempotentId % ( randomizer.nextInt(121) + 50 ) == 0 ) {
+      System.exit( 1 )
+    }
 
     if( !bets[ idempotentId ] ) {
       persist( idempotentId, new Bet( player, game, amount ) )
@@ -38,7 +43,7 @@ public class ReallyUnstableResource implements UnstableResource {
   }
 
   @Override
-  public List<Bet> findAll() {
+  List<Bet> findAll() {
     bets.values() as List
   }
 

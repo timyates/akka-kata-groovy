@@ -5,37 +5,35 @@ import akka.actor.Cancellable
 import akka.actor.UntypedActor
 import akka.event.Logging
 import akka.event.LoggingAdapter
-import akka.util.Duration
 import com.typesafe.akkademo.common.*
+import com.typesafe.akkademo.common.DurationCategory as DC
 
-import static java.util.concurrent.TimeUnit.SECONDS
-
-public class BettingService extends UntypedActor {
+class BettingService extends UntypedActor {
   LoggingAdapter log = Logging.getLogger( context.system(), this )
   private int sequence = 1
   private ActorRef processor
   private long lastUpdate = 0
   private static final long ACTIVE_PERIOD = 5000L
-  private static final String HANDLE_UNPROCESSED_BETS = "unhandledBets"
+  private static final String HANDLE_UNPROCESSED_BETS = 'unhandledBets'
   private Cancellable scheduler
   
   // Note: To make this solution (even) more bullet proof you would have to persist the incoming bets.
   private Map<Integer, Bet> bets = [:]
 
   @Override
-  public void preStart() {
-    scheduler = context.system().scheduler().schedule( Duration.create( 5, SECONDS ),
-                                                       Duration.create( 3, SECONDS ),
-                                                       self,
-                                                       HANDLE_UNPROCESSED_BETS )
+  void preStart() {
+    use( DC ) {
+      scheduler = context.system().scheduler().schedule( 5.seconds(), 3.seconds(),
+                                                         self, HANDLE_UNPROCESSED_BETS )
+    }
   }
 
   @Override
-  public void postStop() {
+  void postStop() {
     scheduler.cancel()
   }
 
-  public void onReceive( Object message ) {
+  void onReceive( Object message ) {
     switch( message ) {
       case Bet :
         activeProcessor?.tell( processBet( message ), self )

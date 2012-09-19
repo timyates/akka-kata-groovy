@@ -1,5 +1,6 @@
 subprojects {
   apply plugin: 'groovy'
+  apply plugin: 'codenarc'
 
   repositories {
     mavenCentral()
@@ -9,9 +10,12 @@ subprojects {
   }
 
   version = '0.1'
-  
+
   dependencies {
     groovy 'org.codehaus.groovy:groovy:2.0.2'
   }
+
+  project.codenarc.configFile = new File( 'config/codenarc/rules.groovy' )
 }
+
 
