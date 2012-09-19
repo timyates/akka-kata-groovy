@@ -1,0 +1,17 @@
+subprojects {
+  apply plugin: 'groovy'
+
+  repositories {
+    mavenCentral()
+    maven {
+      url 'http://repo.typesafe.com/typesafe/releases'
+    }
+  }
+
+  version = '0.1'
+  
+  dependencies {
+    groovy 'org.codehaus.groovy:groovy:2.0.2'
+  }
+}
+

@@ -1,0 +1,16 @@
+dependencies {
+  compile project( ':common' )
+  compile "com.typesafe.akka:akka-actor:$akkaVersion"
+  compile "com.typesafe.akka:akka-remote:$akkaVersion"
+}
+
+task( receive, dependsOn: 'jar', type: JavaExec ) {
+  main = 'com.typesafe.akkademo.client.BetClient'
+  classpath = sourceSets.main.runtimeClasspath
+}
+
+task( send, dependsOn: 'jar', type: JavaExec ) {
+  main = 'com.typesafe.akkademo.client.BetClient'
+  classpath = sourceSets.main.runtimeClasspath
+  args 'send'
+}
